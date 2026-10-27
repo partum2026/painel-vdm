@@ -35,6 +35,7 @@ body {
   box-sizing: border-box;
 }
 * { box-sizing: border-box; min-width: 0; }
+[hidden] { display: none !important; }
 h1, h2, h3 { margin: 0; font-weight: 600; text-wrap: balance; }
 .wrap { position: relative; z-index: 1; height: 100%; display: grid; grid-template-rows: auto 1fr auto; gap: calc(var(--u) * 1.2); padding-block: calc(var(--u) * 1.4); }
 
@@ -339,16 +340,13 @@ $('prio').innerHTML = D.prior_frentes.slice(0,24).map(f => `<div class="pr ${f.g
 // esconde itens de lista que não cabem no painel (evita corte pela metade)
 function fit(){
   document.querySelectorAll('.lista').forEach(l => {
+    const panel = l.closest('.panel') || l.parentElement;
+    const limit = panel.getBoundingClientRect().bottom - parseFloat(getComputedStyle(panel).paddingBottom || 0);
     [...l.children].forEach(c => c.hidden = false);
-    let guard = 20;
-    while (l.scrollHeight > l.clientHeight + 1 && guard-- > 0) {
-      const vis = [...l.children].filter(c => !c.hidden);
-      if (vis.length <= 1) break;
-      vis[vis.length-1].hidden = true;
-    }
+    [...l.children].forEach(c => { if (c.getBoundingClientRect().bottom > limit + 1) c.hidden = true; });
   });
 }
-window.addEventListener('resize', fit); window.addEventListener('load', fit);
+window.addEventListener('resize', fit); window.addEventListener('load', fit); document.fonts?.ready?.then(fit); setTimeout(fit, 1500);
 
 // rotação de telas
 const screens = [...document.querySelectorAll('.screen')];
